@@ -29,3 +29,63 @@ a {
 button {
   cursor: pointer;
 }
+/* ================================
+   Category Submenu
+================================ */
+
+.category-item {
+  transition: background-color 0.2s ease;
+}
+
+.category-item:hover {
+  background-color: #ecfdf5;
+}
+
+.category-item:hover span {
+  color: #059669;
+}
+
+.category-item:hover svg {
+  color: #10b981;
+}
+
+.subcategory-menu {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 8px);
+
+  width: 270px;
+
+  padding: 12px;
+
+  background: white;
+
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+
+  box-shadow:
+    0 20px 40px rgba(15, 23, 42, 0.12),
+    0 5px 15px rgba(15, 23, 42, 0.06);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transform: translateX(10px);
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s ease;
+
+  z-index: 9999;
+}
+
+.category-item:hover + .subcategory-menu,
+.subcategory-menu:hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  pointer-events: auto;
+}

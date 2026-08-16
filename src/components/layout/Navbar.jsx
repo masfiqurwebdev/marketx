@@ -1,5 +1,7 @@
 "use client";
 
+import { useCart } from "../../context/CartContext";
+
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -48,9 +50,11 @@ const categories = [
   "Automotive",
 ];
 
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const { cartCount } = useCart();
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white">
@@ -154,20 +158,18 @@ export default function Navbar() {
           </Link>
 
           {/* Cart */}
-          <Link
-            href="/cart"
-            className="relative flex items-center gap-2 text-gray-700 transition hover:text-emerald-500"
-          >
-            <div className="relative">
-              <ShoppingCart size={23} strokeWidth={1.8} />
+<Link
+  href="/cart"
+  className="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100"
+>
+  <ShoppingCart size={21} />
 
-              <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-500 px-1 text-[9px] font-bold text-white">
-                3
-              </span>
-            </div>
-
-            <span className="text-sm font-semibold">$248.00</span>
-          </Link>
+  {cartCount > 0 && (
+    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1 text-[10px] font-bold text-white">
+      {cartCount > 99 ? "99+" : cartCount}
+    </span>
+  )}
+</Link>
         </div>
       </div>
 
@@ -193,16 +195,18 @@ export default function Navbar() {
         </Link>
 
         {/* Mobile Cart */}
-        <Link
-          href="/cart"
-          className="relative text-gray-700"
-          aria-label="Shopping cart"
-        >
-          <ShoppingCart size={23} />
+<Link
+  href="/cart"
+  className="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100"
+>
+  <ShoppingCart size={21} />
 
-          <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-500 px-1 text-[9px] font-bold text-white">
-            3
-          </span>
+  {cartCount > 0 && (
+    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1 text-[10px] font-bold text-white">
+      {cartCount > 99 ? "99+" : cartCount}
+    </span>
+  )}
+
         </Link>
       </div>
 

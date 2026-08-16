@@ -1,18 +1,20 @@
 import "./globals.css";
-import Navbar from './components/layout/Navbar';
 
-export const metadata = {
-  title: "MarketX - Online Shopping",
-  description: "Shop the latest products at MarketX",
-};
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
+import { CartProvider } from "../context/CartContext";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <Navbar />
+        <CartProvider>
+          <Navbar />
 
-        {children}
+          {children}
+
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
