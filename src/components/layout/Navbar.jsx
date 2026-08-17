@@ -3,16 +3,14 @@
 import { useCart } from "../../context/CartContext";
 
 import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { useWishlist } from "../../context/WishlistContext";
+
+
 import Link from "next/link";
-import {
-  Menu,
-  X,
-  Search,
-  User,
-  Heart,
-  ShoppingCart,
-  ChevronDown,
-} from "lucide-react";
+import {  Menu,  X, Search, User, Heart,ShoppingCart,ChevronDown,} from "lucide-react";
 
 const navLinks = [
   {
@@ -39,6 +37,10 @@ const navLinks = [
     name: "Contact",
     href: "/contact",
   },
+  {
+    name: "My Order",
+    href: "/orders",
+  },
 ];
 
 const categories = [
@@ -55,6 +57,26 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const { cartCount } = useCart();
+const router = useRouter();
+
+const [search, setSearch] = useState("");
+
+const { wishlistCount } = useWishlist();
+
+const handleSearch = (e) => {
+  e.preventDefault();
+
+  const value = search.trim();
+
+  if (!value) {
+    router.push("/shop");
+    return;
+  }
+
+  router.push(
+    `/shop?search=${encodeURIComponent(value)}`
+  );
+};
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white">
@@ -123,16 +145,25 @@ export default function Navbar() {
           </div>
 
           {/* Search Input */}
-          <input
-            type="text"
-            placeholder="Search for products..."
-            className="min-w-0 flex-1 px-4 text-sm outline-none placeholder:text-gray-400"
-          />
+<form
+  onSubmit={handleSearch}
+  className="relative"
+>
+  <Search
+    size={18}
+    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+  />
 
-          {/* Search Button */}
-          <button className="flex w-14 items-center justify-center bg-emerald-500 text-white transition hover:bg-emerald-600">
-            <Search size={20} />
-          </button>
+  <input
+    type="text"
+    value={search}
+    onChange={(e) =>
+      setSearch(e.target.value)
+    }
+    placeholder="Search products..."
+    className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:bg-white"
+  />
+</form>
         </div>
 
         {/* Actions */}
@@ -146,16 +177,20 @@ export default function Navbar() {
           </Link>
 
           {/* Wishlist */}
-          <Link
-            href="/wishlist"
-            className="relative text-gray-700 transition hover:text-emerald-500"
-          >
-            <Heart size={22} strokeWidth={1.8} />
+<Link
+  href="/wishlist"
+  className="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100"
+>
+  <Heart size={21} />
 
-            <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-500 px-1 text-[9px] font-bold text-white">
-              0
-            </span>
-          </Link>
+  {wishlistCount > 0 && (
+    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+      {wishlistCount > 99
+        ? "99+"
+        : wishlistCount}
+    </span>
+  )}
+</Link>
 
           {/* Cart */}
 <Link
@@ -213,18 +248,48 @@ export default function Navbar() {
       {/* ================= MOBILE MENU ================= */}
       {mobileMenuOpen && (
         <div className="border-t border-gray-100 bg-white px-4 pb-5 pt-4 lg:hidden">
-          {/* Mobile Search */}
-          <div className="mb-5 flex h-11 overflow-hidden rounded-xl border border-gray-200">
-            <input
-              type="text"
-              placeholder="Search for products..."
-              className="min-w-0 flex-1 px-4 text-sm outline-none placeholder:text-gray-400"
-            />
+{/* Mobile Search */}
+<div className="border-t border-gray-100 px-4 py-3 lg:hidden">
+  <form
+    onSubmit={handleSearch}
+    className="flex items-center gap-2"
+  >
+    <div className="relative flex-1">
+      <Search
+        size={18}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+      />
 
-            <button className="flex w-12 items-center justify-center bg-emerald-500 text-white">
-              <Search size={19} />
-            </button>
-          </div>
+      <input
+        type="text"
+        value={search}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
+        placeholder="Search products..."
+        className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-10 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:bg-white"
+      />
+
+      {search && (
+        <button
+          type="button"
+          onClick={() => setSearch("")}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-lg text-gray-400 hover:text-gray-600"
+        >
+          ×
+        </button>
+      )}
+    </div>
+
+    {/* Search Button */}
+    <button
+      type="submit"
+      className="flex h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500 px-4 text-sm font-semibold text-white transition hover:bg-emerald-600 active:scale-95"
+    >
+      Search
+    </button>
+  </form>
+</div>
 
           {/* Mobile Navigation */}
           <nav className="flex flex-col">

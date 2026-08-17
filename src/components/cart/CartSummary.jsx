@@ -1,108 +1,291 @@
 "use client";
 
-import Link from "next/link";
 import {
   ArrowRight,
-  ShieldCheck,
-  Truck,
+  Tag,
+  X,
 } from "lucide-react";
+
+import Link from "next/link";
+
+import { useState } from "react";
+
 import { useCart } from "../../context/CartContext";
+import { useCoupon } from "../../context/CouponContext";
 
 export default function CartSummary() {
+  const { cart } = useCart();
+
   const {
-    subtotal,
-    shipping,
-    total,
-  } = useCart();
+    coupon,
+    couponCode,
+    setCouponCode,
+    applyCoupon,
+    removeCoupon,
+    calculateDiscount,
+  } = useCoupon();
+
+  const [couponMessage, setCouponMessage] =
+    useState("");
+
+  const [couponError, setCouponError] =
+    useState(false);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Subtotal
+  |--------------------------------------------------------------------------
+  */
+
+  const subtotal = cart.reduce(
+    (total, item) => {
+      return (
+        total +
+        Number(item.price) *
+          Number(item.quantity)
+      );
+    },
+    0
+  );
+
+  /*
+  |--------------------------------------------------------------------------
+  | Discount
+  |--------------------------------------------------------------------------
+  */
+
+  const discount =
+    calculateDiscount(subtotal);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Shipping
+  |--------------------------------------------------------------------------
+  */
+
+  const shipping =
+    subtotal >= 100 || subtotal === 0
+      ? 0
+      : 10;
+
+  /*
+  |--------------------------------------------------------------------------
+  | Total
+  |--------------------------------------------------------------------------
+  */
+
+  const total =
+    subtotal -
+    discount +
+    shipping;
+
+  /*
+  |--------------------------------------------------------------------------
+  | Apply Coupon
+  |--------------------------------------------------------------------------
+  */
+
+  const handleApplyCoupon = () => {
+    const result = applyCoupon(
+      couponCode,
+      subtotal
+    );
+
+    setCouponMessage(
+      result.message
+    );
+
+    setCouponError(
+      !result.success
+    );
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Remove Coupon
+  |--------------------------------------------------------------------------
+  */
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+
+    setCouponMessage(
+      "Coupon removed."
+    );
+
+    setCouponError(false);
+  };
 
   return (
-    <div className="h-fit lg:sticky lg:top-24">
-      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-        <h2 className="text-lg font-bold text-gray-900">
-          Order Summary
-        </h2>
+    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
 
-        {/* Subtotal */}
-        <div className="mt-6 flex items-center justify-between text-sm">
-          <span className="text-gray-500">
-            Subtotal
-          </span>
+      {/* Title */}
+      <h2 className="text-xl font-bold text-gray-900">
+        Order Summary
+      </h2>
 
-          <span className="font-semibold text-gray-900">
-            ${subtotal.toFixed(2)}
-          </span>
+      {/* Coupon */}
+      <div className="mt-6">
+
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Tag size={17} />
+
+          <span>Have a coupon?</span>
         </div>
 
-        {/* Shipping */}
+        {coupon ? (
+          <div className="mt-3 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+
+            <div>
+              <p className="text-sm font-bold text-emerald-600">
+                {coupon.code}
+              </p>
+
+              <p className="mt-0.5 text-xs text-emerald-600">
+                {coupon.type ===
+                "percentage"
+                  ? `${coupon.value}% discount`
+                  : `$${coupon.value} discount`}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={
+                handleRemoveCoupon
+              }
+              className="flex h-8 w-8 items-center justify-center rounded-full text-emerald-600 transition hover:bg-emerald-100"
+              aria-label="Remove coupon"
+            >
+              <X size={16} />
+            </button>
+
+          </div>
+        ) : (
+          <div className="mt-3 flex gap-2">
+
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(event) => {
+                setCouponCode(
+                  event.target.value
+                );
+
+                setCouponMessage("");
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  handleApplyCoupon();
+                }
+              }}
+              placeholder="Coupon code"
+              className="min-w-0 flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-emerald-500"
+            />
+
+            <button
+              type="button"
+              onClick={
+                handleApplyCoupon
+              }
+              className="rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-emerald-500 hover:text-emerald-500"
+            >
+              Apply
+            </button>
+
+          </div>
+        )}
+
+        {couponMessage && (
+          <p
+            className={`mt-2 text-xs ${
+              couponError
+                ? "text-red-500"
+                : "text-emerald-600"
+            }`}
+          >
+            {couponMessage}
+          </p>
+        )}
+
+      </div>
+
+      {/* Divider */}
+      <div className="my-6 border-t border-gray-100" />
+
+      {/* Subtotal */}
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-gray-500">
+          Subtotal
+        </span>
+
+        <span className="font-semibold text-gray-900">
+          ${subtotal.toFixed(2)}
+        </span>
+      </div>
+
+      {/* Discount */}
+      {discount > 0 && (
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-gray-500">
-            Shipping
+          <span className="text-emerald-600">
+            Discount
           </span>
 
-          <span className="font-semibold text-gray-900">
-            {shipping === 0
-              ? "FREE"
-              : `$${shipping.toFixed(2)}`}
+          <span className="font-semibold text-emerald-600">
+            -${discount.toFixed(2)}
           </span>
         </div>
+      )}
 
-        {/* Divider */}
-        <div className="my-5 border-t border-gray-100" />
+      {/* Shipping */}
+      <div className="mt-4 flex items-center justify-between text-sm">
+        <span className="text-gray-500">
+          Shipping
+        </span>
 
-        {/* Total */}
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-gray-900">
-            Total
-          </span>
+        <span className="font-semibold text-gray-900">
+          {shipping === 0
+            ? "FREE"
+            : `$${shipping.toFixed(2)}`}
+        </span>
+      </div>
 
-          <span className="text-2xl font-black text-emerald-500">
-            ${total.toFixed(2)}
-          </span>
-        </div>
+      {/* Divider */}
+      <div className="my-5 border-t border-gray-100" />
 
-        {/* Checkout */}
+      {/* Total */}
+      <div className="flex items-center justify-between">
+        <span className="text-base font-bold text-gray-900">
+          Total
+        </span>
+
+        <span className="text-2xl font-bold text-gray-900">
+          ${total.toFixed(2)}
+        </span>
+      </div>
+
+      {/* Checkout */}
+      {cart.length > 0 ? (
         <Link
           href="/checkout"
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-600"
         >
           Proceed to Checkout
 
-          <ArrowRight size={17} />
+          <ArrowRight size={18} />
         </Link>
+      ) : (
+        <button
+          type="button"
+          disabled
+          className="mt-6 flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-gray-200 py-3.5 text-sm font-bold text-gray-400"
+        >
+          Proceed to Checkout
 
-        {/* Benefits */}
-        <div className="mt-6 space-y-3 border-t border-gray-100 pt-5">
-          <div className="flex items-center gap-3">
-            <Truck
-              size={18}
-              className="text-emerald-500"
-            />
+          <ArrowRight size={18} />
+        </button>
+      )}
 
-            <span className="text-xs text-gray-500">
-              Free shipping over $50
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <ShieldCheck
-              size={18}
-              className="text-emerald-500"
-            />
-
-            <span className="text-xs text-gray-500">
-              Secure checkout
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Continue Shopping */}
-      <Link
-        href="/shop"
-        className="mt-4 flex items-center justify-center text-sm font-semibold text-gray-500 transition hover:text-emerald-500"
-      >
-        Continue Shopping
-      </Link>
     </div>
   );
 }

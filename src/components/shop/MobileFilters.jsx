@@ -1,209 +1,207 @@
 "use client";
 
-import { useState } from "react";
 import {
-  SlidersHorizontal,
   X,
-  Monitor,
-  Shirt,
-  House,
-  HeartPulse,
-  Dumbbell,
-  Car,
+  RotateCcw,
+  Star,
 } from "lucide-react";
 
-const categories = [
-  {
-    name: "All Products",
-    value: "all",
-    icon: SlidersHorizontal,
-  },
-  {
-    name: "Electronics",
-    value: "electronics",
-    icon: Monitor,
-  },
-  {
-    name: "Fashion",
-    value: "fashion",
-    icon: Shirt,
-  },
-  {
-    name: "Home & Kitchen",
-    value: "home-kitchen",
-    icon: House,
-  },
-  {
-    name: "Beauty & Health",
-    value: "beauty-health",
-    icon: HeartPulse,
-  },
-  {
-    name: "Sports",
-    value: "sports-outdoors",
-    icon: Dumbbell,
-  },
-  {
-    name: "Automotive",
-    value: "automotive",
-    icon: Car,
-  },
-];
-
 export default function MobileFilters({
-  category,
-  setCategory,
+  open,
+  setOpen,
+  categories = [],
+  selectedCategory,
+  setSelectedCategory,
+  minPrice,
+  setMinPrice,
+  maxPrice,
+  setMaxPrice,
+  minRating,
+  setMinRating,
+  clearFilters,
 }) {
-  const [open, setOpen] = useState(false);
+  if (!open) return null;
 
   return (
-    <>
-      {/* Filter Button */}
+    <div className="fixed inset-0 z-[100] lg:hidden">
+
+      {/* Overlay */}
       <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-emerald-500 hover:text-emerald-500 lg:hidden"
-      >
-        <SlidersHorizontal size={17} />
+        type="button"
+        aria-label="Close filters"
+        onClick={() => setOpen(false)}
+        className="absolute inset-0 bg-black/40"
+      />
 
-        Filters
-      </button>
+      {/* Drawer */}
+      <div className="absolute right-0 top-0 h-full w-[88%] max-w-[380px] overflow-y-auto bg-white shadow-xl">
 
-      {/* Overlay + Drawer */}
-      {open && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
-          {/* Overlay */}
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4">
+
+          <h2 className="text-lg font-bold text-gray-900">
+            Filters
+          </h2>
+
           <button
             type="button"
-            aria-label="Close filters"
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/40"
-          />
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600"
+          >
+            <X size={19} />
+          </button>
+        </div>
 
-          {/* Drawer */}
-          <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm overflow-y-auto bg-white shadow-2xl">
-            {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal
-                  size={19}
-                  className="text-emerald-500"
-                />
+        <div className="p-5">
 
-                <h2 className="font-bold text-gray-900">
-                  Filters
-                </h2>
-              </div>
+          {/* Category */}
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">
+              Category
+            </h3>
+
+            <div className="mt-3 space-y-2">
 
               <button
                 type="button"
-                onClick={() => setOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-gray-200"
-                aria-label="Close filters"
+                onClick={() =>
+                  setSelectedCategory("all")
+                }
+                className={`w-full rounded-lg px-3 py-2 text-left text-sm ${
+                  selectedCategory === "all"
+                    ? "bg-emerald-50 font-semibold text-emerald-600"
+                    : "text-gray-600"
+                }`}
               >
-                <X size={19} />
+                All Products
               </button>
-            </div>
 
-            <div className="p-5">
-              {/* Categories */}
-              <div>
-                <h3 className="mb-3 text-sm font-semibold text-gray-900">
-                  Categories
-                </h3>
-
-                <div className="space-y-1">
-                  {categories.map((item) => {
-                    const Icon = item.icon;
-                    const active = category === item.value;
-
-                    return (
-                      <button
-                        key={item.value}
-                        type="button"
-                        onClick={() => {
-                          setCategory(item.value);
-                          setOpen(false);
-                        }}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${
-                          active
-                            ? "bg-emerald-50 font-semibold text-emerald-600"
-                            : "text-gray-600 hover:bg-gray-50"
-                        }`}
-                      >
-                        <Icon size={17} />
-
-                        <span>{item.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="my-6 border-t border-gray-100" />
-
-              {/* Price */}
-              <div>
-                <h3 className="mb-4 text-sm font-semibold text-gray-900">
-                  Price Range
-                </h3>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
-                  />
-
-                  <span className="text-gray-400">
-                    -
-                  </span>
-
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
-                  />
-                </div>
-              </div>
-
-              {/* Rating */}
-              <div className="mt-6">
-                <h3 className="mb-3 text-sm font-semibold text-gray-900">
-                  Rating
-                </h3>
-
-                <div className="space-y-2">
-                  {[5, 4, 3, 2].map((rating) => (
-                    <button
-                      key={rating}
-                      type="button"
-                      className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm transition hover:bg-gray-50"
-                    >
-                      <span className="text-yellow-400">
-                        {"★".repeat(rating)}
-                      </span>
-
-                      <span className="text-gray-400">
-                        & up
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Apply Button */}
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="mt-8 w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white transition hover:bg-emerald-600"
-              >
-                Apply Filters
-              </button>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() =>
+                    setSelectedCategory(category)
+                  }
+                  className={`w-full rounded-lg px-3 py-2 text-left text-sm ${
+                    selectedCategory === category
+                      ? "bg-emerald-50 font-semibold text-emerald-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
             </div>
           </div>
+
+          {/* Price */}
+          <div className="mt-7 border-t border-gray-100 pt-6">
+
+            <h3 className="text-sm font-bold text-gray-900">
+              Price Range
+            </h3>
+
+            <div className="mt-3 grid grid-cols-2 gap-2">
+
+              <input
+                type="number"
+                min="0"
+                value={minPrice}
+                onChange={(e) =>
+                  setMinPrice(e.target.value)
+                }
+                placeholder="Min"
+                className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-emerald-500"
+              />
+
+              <input
+                type="number"
+                min="0"
+                value={maxPrice}
+                onChange={(e) =>
+                  setMaxPrice(e.target.value)
+                }
+                placeholder="Max"
+                className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-emerald-500"
+              />
+
+            </div>
+          </div>
+
+          {/* Rating */}
+          <div className="mt-7 border-t border-gray-100 pt-6">
+
+            <h3 className="text-sm font-bold text-gray-900">
+              Customer Rating
+            </h3>
+
+            <div className="mt-3 space-y-2">
+
+              {[4, 3, 2, 1].map((rating) => (
+                <button
+                  key={rating}
+                  type="button"
+                  onClick={() =>
+                    setMinRating(
+                      minRating === rating
+                        ? 0
+                        : rating
+                    )
+                  }
+                  className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 ${
+                    minRating === rating
+                      ? "bg-emerald-50"
+                      : ""
+                  }`}
+                >
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map(
+                      (star) => (
+                        <Star
+                          key={star}
+                          size={14}
+                          className={
+                            star <= rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          }
+                        />
+                      )
+                    )}
+                  </div>
+
+                  <span className="text-sm text-gray-500">
+                    & up
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="mt-8 flex gap-3">
+
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-700"
+            >
+              <RotateCcw size={16} />
+              Clear
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex flex-1 items-center justify-center rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white"
+            >
+              Apply Filters
+            </button>
+
+          </div>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }

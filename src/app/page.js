@@ -9,7 +9,7 @@ import PromoBanner from "../components/home/PromoBanner";
 
 export default function Home() {
   return (
-    <main>\
+    <main>
       <HeroSection />
       <Features />
       <FlashDeals />

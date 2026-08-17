@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useState } from "react";
 
+import { useWishlist } from "../../context/WishlistContext";
+
+
 export default function ProductCard({ product }) {
   const [liked, setLiked] = useState(false);
 
@@ -14,6 +17,11 @@ export default function ProductCard({ product }) {
           ((product.oldPrice - product.price) / product.oldPrice) * 100
         )
       : 0;
+
+    const {
+  isInWishlist,
+  toggleWishlist,
+} = useWishlist();
 
   return (
     <div className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
@@ -27,18 +35,29 @@ export default function ProductCard({ product }) {
         )}
 
         {/* Wishlist */}
-        <button
-          onClick={() => setLiked(!liked)}
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm transition hover:bg-emerald-500 hover:text-white"
-          aria-label="Add to wishlist"
-        >
-          <Heart
-            size={18}
-            fill={liked ? "currentColor" : "none"}
-            className={liked ? "text-red-500" : ""}
-          />
-        </button>
-
+<button
+  type="button"
+  onClick={() => toggleWishlist(product)}
+  aria-label={
+    isInWishlist(product.id)
+      ? "Remove from wishlist"
+      : "Add to wishlist"
+  }
+  className={`absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition ${
+    isInWishlist(product.id)
+      ? "text-red-500"
+      : "text-gray-500 hover:text-red-500"
+  }`}
+>
+  <Heart
+    size={19}
+    fill={
+      isInWishlist(product.id)
+        ? "currentColor"
+        : "none"
+    }
+  />
+</button>
         {/* Product Image */}
         <Link href={`/products/${product.id}`}>
           <Image

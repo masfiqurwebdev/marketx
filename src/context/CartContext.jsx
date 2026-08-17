@@ -7,53 +7,75 @@ import {
   useState,
 } from "react";
 
-const CartContext = createContext();
+const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-  // Load cart from localStorage
+  // ============================================
+  // LOAD CART FROM LOCAL STORAGE
+  // ============================================
+
   useEffect(() => {
     try {
-      const savedCart = localStorage.getItem("marketx-cart");
+      const savedCart =
+        localStorage.getItem("marketx-cart");
 
       if (savedCart) {
-        setCart(JSON.parse(savedCart));
+        const parsedCart = JSON.parse(savedCart);
+
+        if (Array.isArray(parsedCart)) {
+          setCart(parsedCart);
+        }
       }
     } catch (error) {
-      console.error("Failed to load cart:", error);
+      console.error(
+        "Failed to load cart:",
+        error
+      );
     } finally {
-      setIsLoaded(true);
+      setLoaded(true);
     }
   }, []);
 
-  // Save cart to localStorage
+  // ============================================
+  // SAVE CART TO LOCAL STORAGE
+  // ============================================
+
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!loaded) return;
 
-    localStorage.setItem(
-      "marketx-cart",
-      JSON.stringify(cart)
-    );
-  }, [cart, isLoaded]);
+    try {
+      localStorage.setItem(
+        "marketx-cart",
+        JSON.stringify(cart)
+      );
+    } catch (error) {
+      console.error(
+        "Failed to save cart:",
+        error
+      );
+    }
+  }, [cart, loaded]);
 
-  // Add product
+  // ============================================
+  // ADD TO CART
+  // ============================================
+
   const addToCart = (product, quantity = 1) => {
     setCart((currentCart) => {
-      const existingProduct = currentCart.find(
+      const existingItem = currentCart.find(
         (item) => item.id === product.id
       );
 
-      if (existingProduct) {
+      if (existingItem) {
         return currentCart.map((item) =>
           item.id === product.id
             ? {
                 ...item,
-                quantity: Math.min(
+                quantity:
                   item.quantity + quantity,
-                  item.stock
-                ),
               }
             : item
         );
@@ -63,13 +85,16 @@ export function CartProvider({ children }) {
         ...currentCart,
         {
           ...product,
-          quantity: Math.min(quantity, product.stock),
+          quantity,
         },
       ];
     });
   };
 
-  // Remove product
+  // ============================================
+  // REMOVE FROM CART
+  // ============================================
+
   const removeFromCart = (productId) => {
     setCart((currentCart) =>
       currentCart.filter(
@@ -78,91 +103,151 @@ export function CartProvider({ children }) {
     );
   };
 
-  // Increase quantity
+  // ============================================
+  // INCREASE QUANTITY
+  // ============================================
+
   const increaseQuantity = (productId) => {
     setCart((currentCart) =>
-      currentCart.map((item) => {
-        if (item.id !== productId) {
-          return item;
-        }
-
-        return {
-          ...item,
-          quantity: Math.min(
-            item.quantity + 1,
-            item.stock
-          ),
-        };
-      })
+      currentCart.map((item) =>
+        item.id === productId
+          ? {
+              ...item,
+              quantity: item.quantity + 1,
+            }
+          : item
+      )
     );
   };
 
-  // Decrease quantity
+  // ============================================
+  // DECREASE QUANTITY
+  // ============================================
+
   const decreaseQuantity = (productId) => {
     setCart((currentCart) =>
       currentCart
-        .map((item) => {
-          if (item.id !== productId) {
-            return item;
-          }
-
-          return {
-            ...item,
-            quantity: item.quantity - 1,
-          };
-        })
+        .map((item) =>
+          item.id === productId
+            ? {
+                ...item,
+                quantity: item.quantity - 1,
+              }
+            : item
+        )
         .filter((item) => item.quantity > 0)
     );
   };
 
-  // Clear cart
+  // ============================================
+  // UPDATE QUANTITY
+  // ============================================
+
+  const updateQuantity = (
+    productId,
+    quantity
+  ) => {
+    const newQuantity = Number(quantity);
+
+    if (newQuantity <= 0 || isNaN(newQuantity)) {
+      removeFromCart(productId);
+      return;
+    }
+
+    setCart((currentCart) =>
+      currentCart.map((item) =>
+        item.id === productId
+          ? {
+              ...item,
+              quantity: newQuantity,
+            }
+          : item
+      )
+    );
+  };
+
+  // ============================================
+  // CLEAR CART
+  // ============================================
+
   const clearCart = () => {
     setCart([]);
   };
 
-  // Number of products
+  // ============================================
+  // CHECK IF PRODUCT IS IN CART
+  // ============================================
+
+  const isInCart = (productId) => {
+    return cart.some(
+      (item) => item.id === productId
+    );
+  };
+
+  // ============================================
+  // GET SPECIFIC CART ITEM
+  // ============================================
+
+  const getCartItem = (productId) => {
+    return cart.find(
+      (item) => item.id === productId
+    );
+  };
+
+  // ============================================
+  // TOTAL QUANTITY
+  // ============================================
+
   const cartCount = cart.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
-
-  // Subtotal
-  const subtotal = cart.reduce(
     (total, item) =>
-      total + item.price * item.quantity,
+      total + Number(item.quantity || 0),
     0
   );
 
-  // Shipping
-  const shipping =
-    subtotal === 0
-      ? 0
-      : subtotal >= 50
-        ? 0
-        : 5;
+  // ============================================
+  // TOTAL PRICE
+  // ============================================
 
-  // Total
-  const total = subtotal + shipping;
+  const cartTotal = cart.reduce(
+    (total, item) =>
+      total +
+      Number(item.price || 0) *
+        Number(item.quantity || 0),
+    0
+  );
+
+  // ============================================
+  // PROVIDER
+  // ============================================
 
   return (
     <CartContext.Provider
       value={{
         cart,
         cartCount,
-        subtotal,
-        shipping,
-        total,
+        cartTotal,
+
         addToCart,
         removeFromCart,
+
         increaseQuantity,
         decreaseQuantity,
+        updateQuantity,
+
         clearCart,
+
+        isInCart,
+        getCartItem,
       }}
     >
       {children}
     </CartContext.Provider>
   );
 }
+
+// ============================================
+// CUSTOM HOOK
+// ============================================
 
 export function useCart() {
   const context = useContext(CartContext);

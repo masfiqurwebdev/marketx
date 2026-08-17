@@ -126,6 +126,21 @@ const products = [
       "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&q=80",
     badge: "Flash Deal",
   },
+  {
+    id: "p009",
+    name: "Portable Bluetooth Speaker",
+    slug: "portable-bluetooth-speaker",
+    category: "electronics",
+    price: 44.99,
+    oldPrice: 69.99,
+    discount: 36,
+    rating: 4.6,
+    reviews: 93,
+    stock: 27,
+    image:
+      "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&q=80",
+    badge: "Flash Deal",
+  },
 ];
 
 export default products;
